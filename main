@@ -1,0 +1,58 @@
+#!/usr/bin/python
+
+# 10708 HW2 Question 3
+# Author: Lee Gao, lilig@andrew.cmu.edu
+
+from hw2_functions import *
+
+# load data sets
+train = data_loader('train')
+dev = data_loader('dev')
+test = data_loader('test')
+
+# find states/tags
+tags = ['<START>']
+for sent in train:
+    for item in sent:
+        if item[3] not in tags and item[3] != '<STOP>':
+            tags.append(item[3])
+tags.append('<STOP>')
+
+# find words
+words = []
+for sent in train:
+    for item in sent:
+        if item[0] not in words:
+            words.append(item[0])
+
+# load weights
+weights = {}
+with open('/home/lilig/Dropbox/project/hw2_data/weights','r+') as fobj:
+    for line in fobj:
+        ls = line.split()
+        weights[ls[0]] = float(ls[1])
+fobj.closed
+
+##### Part 1: HMM NER tagger #####
+A = transition(train,tags)
+B = emission(train,tags,words)
+# generating dev-1
+hmm_tagger('dev',A,B,tags,words)
+# generating test-1
+hmm_tagger('test',A,B,tags,words)
+
+##### Part 2: Linear Model NER tagger #####
+# generating dev-2
+linear_tagger('dev',tags,weights)
+# generating test-2
+linear_tagger('test',tags,weights)
+
+##### Part 3: Linear Model NER tagger with self-trained weights #####
+# THIS PART OF CODE WORKS FOR SMALL SAMPLE, BUT TAKES VERY LONG TIME, SO THE WHOLE SAMPLE HAS NOT BEEN IMPLEMENTED YET!!
+# train weights: takes very long time!
+# weight_train(train,tags)
+# generating dev-3
+# linear_tagger('dev',tags,weight_trained)
+# generating test-3
+# linear_tagger('test',tags,weight_trained)
+
